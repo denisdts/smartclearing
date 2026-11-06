@@ -1,3 +1,4 @@
+import { File } from 'expo-file-system';
 import { Platform } from 'react-native';
 
 import { apiRequest } from './client';
@@ -110,7 +111,6 @@ export async function fetchPlaces(
 export type UploadPhotoInput = {
   uri: string;
   fileName: string;
-  mimeType: string;
   houseId: number;
   podjezdId: number;
   etazhId: number;
@@ -128,14 +128,8 @@ export async function uploadPhoto(
     const blob = await (await fetch(input.uri)).blob();
     form.append('photo', blob, input.fileName);
   } else {
-    form.append(
-      'photo',
-      {
-        uri: input.uri,
-        name: input.fileName,
-        type: input.mimeType,
-      } as unknown as Blob,
-    );
+    const file = new File(input.uri);
+    form.append('photo', file as unknown as Blob);
   }
 
   form.append('house_id', String(input.houseId));

@@ -4,7 +4,6 @@ export type Photo = {
   id: string;
   uri: string;
   fileName: string;
-  mimeType: string;
   place: string;
   houseId: number;
   podjezdId: number;

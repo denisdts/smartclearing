@@ -104,7 +104,6 @@ export function PhotoProvider({ children }: PropsWithChildren) {
         id,
         uri,
         fileName,
-        mimeType: 'image/jpeg',
         place: input.place,
         houseId: input.houseId,
         podjezdId: input.podjezdId,
@@ -149,7 +148,6 @@ export function PhotoProvider({ children }: PropsWithChildren) {
           await uploadPhoto(token, {
             uri: photo.uri,
             fileName: photo.fileName,
-            mimeType: photo.mimeType,
             houseId: photo.houseId,
             podjezdId: photo.podjezdId,
             etazhId: photo.etazhId,
@@ -171,7 +169,9 @@ export function PhotoProvider({ children }: PropsWithChildren) {
           const message =
             error instanceof ApiError
               ? error.message
-              : 'Не удалось загрузить фотографию';
+              : error instanceof Error && error.message
+                ? error.message
+                : 'Не удалось загрузить фотографию';
 
           await commit(
             photosRef.current.map((item) =>
