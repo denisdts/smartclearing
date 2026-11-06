@@ -1,76 +1,60 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useRef, useState } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { ActivityIndicator, Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { useAuth } from '@/auth/AuthContext';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { Screen } from '@/components/Screen';
 import { usePhotos } from '@/photos/PhotoContext';
 import { colors, radius, spacing } from '@/theme';
 
-const SYNC_INTERVAL_MS = 700;
-
 export default function SyncScreen() {
-  const { photos, markSynced, resetSynced } = usePhotos();
-  const [isSyncing, setIsSyncing] = useState(false);
+  const { session, signOut } = useAuth();
+  const { photos, isLoading, uploadingId, uploadPending, removePhoto } =
+    usePhotos();
+
+  const [isUploading, setIsUploading] = useState(false);
+  const [runTotal, setRunTotal] = useState(0);
   const [lastSync, setLastSync] = useState<Date | null>(null);
-  const queueRef = useRef<string[]>([]);
+  const [notice, setNotice] = useState<string | null>(null);
 
-  const syncedCount = photos.filter((photo) => photo.status === 'synced').length;
-  const pendingCount = photos.length - syncedCount;
-  const progress = photos.length === 0 ? 0 : syncedCount / photos.length;
+  const completed = Math.min(runTotal, Math.max(0, runTotal - photos.length));
+  const progress = runTotal === 0 ? 0 : completed / runTotal;
+  const failedCount = photos.filter((photo) => photo.status === 'failed').length;
 
-  useEffect(() => {
-    if (!isSyncing) {
+  const handleUpload = async () => {
+    if (!session || isUploading || photos.length === 0) {
       return;
     }
 
-    const finish = () => {
-      setIsSyncing(false);
-      setLastSync(new Date());
-    };
+    setIsUploading(true);
+    setNotice(null);
+    setLastSync(null);
+    setRunTotal(photos.length);
 
-    const interval = setInterval(() => {
-      const nextId = queueRef.current.shift();
+    const result = await uploadPending(session.token);
 
-      if (!nextId) {
-        clearInterval(interval);
-        finish();
-        return;
-      }
+    setIsUploading(false);
+    setLastSync(new Date());
 
-      markSynced(nextId);
-
-      if (queueRef.current.length === 0) {
-        clearInterval(interval);
-        finish();
-      }
-    }, SYNC_INTERVAL_MS);
-
-    return () => clearInterval(interval);
-  }, [isSyncing, markSynced]);
-
-  const handleSync = () => {
-    if (isSyncing) {
+    if (result.unauthorized) {
+      Alert.alert('Сессия истекла', 'Войдите снова, чтобы продолжить загрузку.');
+      await signOut();
       return;
     }
 
-    if (pendingCount === 0) {
-      resetSynced();
-      queueRef.current = photos.map((photo) => photo.id);
-    } else {
-      queueRef.current = photos
-        .filter((photo) => photo.status === 'pending')
-        .map((photo) => photo.id);
+    if (result.failed > 0) {
+      setNotice(
+        `Не удалось загрузить ${result.failed}. Фотографии остались в очереди — повторите попытку.`,
+      );
     }
-
-    setIsSyncing(true);
   };
 
   return (
     <Screen scroll>
       <View style={styles.progressCard}>
         <View style={styles.progressHeader}>
-          <Text style={styles.progressTitle}>Синхронизация фотографий</Text>
+          <Text style={styles.progressTitle}>Очередь фотографий</Text>
           <Text style={styles.progressPercent}>
             {Math.round(progress * 100)}%
           </Text>
@@ -83,69 +67,85 @@ export default function SyncScreen() {
         </View>
 
         <Text style={styles.progressMeta}>
-          {syncedCount} из {photos.length} загружено
-          {pendingCount > 0 ? ` · осталось ${pendingCount}` : ' · всё готово'}
+          {photos.length === 0
+            ? 'Очередь пуста — все фотографии загружены'
+            : `В очереди: ${photos.length}${
+                failedCount > 0 ? ` · с ошибкой: ${failedCount}` : ''
+              }`}
         </Text>
 
         <Text style={styles.progressMeta}>
           {lastSync
-            ? `Последняя синхронизация: ${lastSync.toLocaleTimeString('ru-RU', {
+            ? `Последняя загрузка: ${lastSync.toLocaleTimeString('ru-RU', {
                 hour: '2-digit',
                 minute: '2-digit',
               })}`
-            : syncedCount > 0
-              ? 'Часть фотографий уже загружена'
-              : 'Фотографии ещё не синхронизированы'}
+            : 'Загрузите очередь, когда появится соединение'}
         </Text>
       </View>
 
-      <Text style={styles.sectionTitle}>Все фотографии</Text>
+      {notice ? <Text style={styles.notice}>{notice}</Text> : null}
 
-      {photos.length === 0 ? (
+      <Text style={styles.sectionTitle}>Фотографии на устройстве</Text>
+
+      {isLoading ? (
+        <View style={styles.loadingCard}>
+          <ActivityIndicator color={colors.primary} />
+          <Text style={styles.empty}>Загружаем очередь…</Text>
+        </View>
+      ) : photos.length === 0 ? (
         <Text style={styles.empty}>
           Пока нет фотографий. Сделайте снимки на экране места.
         </Text>
       ) : (
         photos.map((photo) => {
-          const isSynced = photo.status === 'synced';
+          const isActive = photo.id === uploadingId;
+          const isFailed = photo.status === 'failed';
 
           return (
             <View key={photo.id} style={styles.photoRow}>
-              {photo.uri ? (
-                <Image source={{ uri: photo.uri }} style={styles.thumbnail} />
-              ) : (
-                <View
-                  style={[
-                    styles.photoIcon,
-                    isSynced && styles.photoIconSynced,
-                  ]}
-                >
-                  <Ionicons
-                    name={isSynced ? 'cloud-done-outline' : 'image-outline'}
-                    size={22}
-                    color={isSynced ? colors.background : colors.primary}
-                  />
-                </View>
-              )}
+              <Image source={{ uri: photo.uri }} style={styles.thumbnail} />
 
               <View style={styles.photoText}>
                 <Text style={styles.photoName} numberOfLines={1}>
-                  {photo.name}
+                  {photo.fileName}
                 </Text>
                 <Text style={styles.photoMeta} numberOfLines={2}>
                   {photo.place}
-                  {photo.size ? ` · ${photo.size}` : ''}
                 </Text>
+                {isFailed && photo.error ? (
+                  <Text style={styles.photoError} numberOfLines={2}>
+                    {photo.error}
+                  </Text>
+                ) : null}
               </View>
 
-              <Text
-                style={[
-                  styles.status,
-                  isSynced ? styles.statusSynced : styles.statusPending,
+              {isActive ? (
+                <ActivityIndicator color={colors.primary} />
+              ) : isFailed ? (
+                <Text style={[styles.status, styles.statusFailed]}>ошибка</Text>
+              ) : (
+                <Text style={[styles.status, styles.statusPending]}>
+                  в очереди
+                </Text>
+              )}
+
+              <Pressable
+                accessibilityLabel="Удалить из очереди"
+                accessibilityRole="button"
+                disabled={isUploading}
+                hitSlop={8}
+                onPress={() => {
+                  void removePhoto(photo.id);
+                }}
+                style={({ pressed }) => [
+                  styles.removeButton,
+                  pressed && styles.pressed,
+                  isUploading && styles.disabled,
                 ]}
               >
-                {isSynced ? 'готово' : 'в очереди'}
-              </Text>
+                <Ionicons name="trash-outline" size={18} color={colors.danger} />
+              </Pressable>
             </View>
           );
         })
@@ -153,21 +153,24 @@ export default function SyncScreen() {
 
       <PrimaryButton
         title={
-          isSyncing
-            ? 'Синхронизация…'
-            : pendingCount === 0
-              ? 'Синхронизировать заново'
-              : `Синхронизировать (${pendingCount})`
+          isUploading
+            ? 'Загрузка…'
+            : photos.length === 0
+              ? 'Очередь пуста'
+              : `Загрузить (${photos.length})`
         }
-        icon={isSyncing ? undefined : 'cloud-upload-outline'}
-        loading={isSyncing}
-        onPress={handleSync}
+        icon={isUploading ? undefined : 'cloud-upload-outline'}
+        loading={isUploading}
+        disabled={photos.length === 0 || isLoading}
+        onPress={() => {
+          void handleUpload();
+        }}
         style={styles.button}
       />
 
       <Text style={styles.hint}>
-        В демо-режиме загрузка имитируется. Подключите API сервиса, чтобы
-        отправлять реальные файлы.
+        Каждая фотография удаляется с устройства сразу после успешной загрузки
+        в сервис.
       </Text>
     </Screen>
   );
@@ -214,6 +217,16 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     fontSize: 13,
   },
+  notice: {
+    color: colors.warning,
+    fontSize: 13,
+    lineHeight: 19,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.md,
+  },
   sectionTitle: {
     color: colors.textMuted,
     fontSize: 13,
@@ -232,6 +245,11 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     padding: spacing.md,
   },
+  loadingCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
   photoRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -241,17 +259,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     padding: spacing.md,
-  },
-  photoIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: radius.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.surfaceAlt,
-  },
-  photoIconSynced: {
-    backgroundColor: colors.primary,
   },
   thumbnail: {
     width: 44,
@@ -273,15 +280,32 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 17,
   },
+  photoError: {
+    color: colors.danger,
+    fontSize: 12,
+    lineHeight: 17,
+  },
   status: {
     fontSize: 12,
     fontWeight: '600',
   },
-  statusSynced: {
-    color: colors.primary,
-  },
   statusPending: {
     color: colors.warning,
+  },
+  statusFailed: {
+    color: colors.danger,
+  },
+  removeButton: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pressed: {
+    opacity: 0.6,
+  },
+  disabled: {
+    opacity: 0.4,
   },
   button: {
     marginTop: spacing.md,

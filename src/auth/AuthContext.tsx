@@ -8,21 +8,40 @@ import {
   type PropsWithChildren,
 } from 'react';
 
+import { loginRequest } from '@/api/catalog';
 import { loadSession, saveSession } from './storage';
 
+export type SessionUser = {
+  id: number;
+  login: string;
+  email: string | null;
+  name: string | null;
+};
+
 export type Session = {
-  email: string;
   token: string;
+  expiresAt: string;
+  user: SessionUser;
 };
 
 type AuthContextValue = {
   session: Session | null;
   isLoading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (login: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+
+function isSessionValid(session: Session): boolean {
+  if (!session.token || !session.user || !session.expiresAt) {
+    return false;
+  }
+
+  const expiresAt = Date.parse(session.expiresAt);
+
+  return Number.isNaN(expiresAt) || expiresAt > Date.now();
+}
 
 export function AuthProvider({ children }: PropsWithChildren) {
   const [session, setSession] = useState<Session | null>(null);
@@ -32,14 +51,17 @@ export function AuthProvider({ children }: PropsWithChildren) {
     let cancelled = false;
 
     loadSession()
-      .then((raw) => {
+      .then(async (raw) => {
         if (cancelled || !raw) {
           return;
         }
+
         try {
           const parsed = JSON.parse(raw) as Session;
-          if (parsed?.email && parsed?.token) {
+          if (isSessionValid(parsed)) {
             setSession(parsed);
+          } else {
+            await saveSession(null);
           }
         } catch {
           setSession(null);
@@ -56,11 +78,20 @@ export function AuthProvider({ children }: PropsWithChildren) {
     };
   }, []);
 
-  const signIn = useCallback(async (email: string, _password: string) => {
+  const signIn = useCallback(async (login: string, password: string) => {
+    const response = await loginRequest(login.trim(), password);
+
     const next: Session = {
-      email: email.trim(),
-      token: `mock-${Date.now()}`,
+      token: response.access_token,
+      expiresAt: response.expires_at,
+      user: {
+        id: response.user.id,
+        login: response.user.login,
+        email: response.user.email,
+        name: response.user.name,
+      },
     };
+
     await saveSession(JSON.stringify(next));
     setSession(next);
   }, []);

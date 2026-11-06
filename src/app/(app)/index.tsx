@@ -1,47 +1,91 @@
 import { router } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { fetchCities, fetchHouses } from '@/api/catalog';
 import { useAuth } from '@/auth/AuthContext';
 import { OptionCard } from '@/components/OptionCard';
+import { RequestState } from '@/components/RequestState';
 import { Screen } from '@/components/Screen';
-import { houses } from '@/data/buildings';
-import { colors, spacing } from '@/theme';
-import { plural } from '@/utils/plural';
+import { useApiData } from '@/hooks/useApiData';
+import { colors, radius, spacing } from '@/theme';
+
+type HouseItem = {
+  id: number;
+  cityName: string;
+  address: string;
+};
+
+async function loadHouses(token: string): Promise<HouseItem[]> {
+  const cities = await fetchCities(token);
+  const groups = await Promise.all(
+    cities.map(async (city) => {
+      const houses = await fetchHouses(token, city.id);
+      return houses.map((house) => ({
+        id: house.id,
+        cityName: city.name,
+        address: house.address,
+      }));
+    }),
+  );
+
+  return groups.flat();
+}
 
 export default function HousesScreen() {
   const { session } = useAuth();
+  const { data, error, isLoading, reload } = useApiData(
+    loadHouses,
+    session?.token ?? null,
+    'houses',
+  );
+
+  const houses = data ?? [];
+  const userName = session?.user.name || session?.user.login || session?.user.email;
 
   return (
     <Screen scroll>
       <View style={styles.intro}>
         <Text style={styles.greeting}>Здравствуйте</Text>
-        <Text style={styles.email} numberOfLines={1}>
-          {session?.email}
+        <Text style={styles.name} numberOfLines={1}>
+          {userName}
         </Text>
         <Text style={styles.hint}>
           Выберите дом, в котором нужно провести клиринг.
         </Text>
       </View>
 
-      <View style={styles.list}>
-        {houses.map((house) => (
-          <OptionCard
-            key={house.id}
-            icon="home-outline"
-            title={house.name}
-            subtitle={`${house.address} · ${house.entrances.length} ${plural(
-              house.entrances.length,
-              ['подъезд', 'подъезда', 'подъездов'],
-            )}`}
-            onPress={() =>
-              router.push({
-                pathname: '/house/[houseId]/entrances',
-                params: { houseId: house.id },
-              })
-            }
-          />
-        ))}
-      </View>
+      <RequestState isLoading={isLoading} error={error} onRetry={reload} />
+
+      {!isLoading && !error ? (
+        houses.length === 0 ? (
+          <View style={styles.empty}>
+            <Text style={styles.emptyText}>
+              У вас пока нет доступных домов. Обратитесь к администратору
+              сервиса.
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.list}>
+            {houses.map((house) => (
+              <OptionCard
+                key={house.id}
+                icon="home-outline"
+                title={house.address}
+                subtitle={house.cityName}
+                onPress={() =>
+                  router.push({
+                    pathname: '/house/[houseId]/entrances',
+                    params: {
+                      houseId: String(house.id),
+                      houseAddress: house.address,
+                    },
+                  })
+                }
+              />
+            ))}
+          </View>
+        )
+      ) : null}
     </Screen>
   );
 }
@@ -57,7 +101,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
-  email: {
+  name: {
     color: colors.text,
     fontSize: 20,
     fontWeight: '700',
@@ -70,5 +114,17 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: spacing.sm,
+  },
+  empty: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.md,
+  },
+  emptyText: {
+    color: colors.textMuted,
+    fontSize: 14,
+    lineHeight: 20,
   },
 });

@@ -60,14 +60,18 @@ export default function SettingsScreen() {
         <View style={styles.accountRow}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>
-              {session?.email?.[0]?.toUpperCase() ?? 'S'}
+              {session?.user.name?.[0]?.toUpperCase() ??
+                session?.user.login?.[0]?.toUpperCase() ??
+                'S'}
             </Text>
           </View>
           <View style={styles.accountText}>
             <Text style={styles.email} numberOfLines={1}>
-              {session?.email}
+              {session?.user.name || session?.user.login}
             </Text>
-            <Text style={styles.rowDescription}>Авторизован</Text>
+            <Text style={styles.rowDescription} numberOfLines={1}>
+              {session?.user.email || 'Авторизован'}
+            </Text>
           </View>
         </View>
       </View>

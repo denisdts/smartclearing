@@ -13,6 +13,7 @@ import {
   type TextInputInstance,
 } from 'react-native';
 
+import { ApiError } from '@/api/client';
 import { useAuth } from '@/auth/AuthContext';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { Screen } from '@/components/Screen';
@@ -40,8 +41,20 @@ export default function LoginScreen() {
     try {
       await signIn(login, password);
       router.replace('/');
-    } catch {
-      setError('Не удалось войти. Попробуйте ещё раз.');
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 401) {
+          setError('Неверный логин или пароль.');
+        } else if (error.status === 422) {
+          setError('Проверьте логин и пароль.');
+        } else if (error.status === 0) {
+          setError(error.message);
+        } else {
+          setError(error.message);
+        }
+      } else {
+        setError('Не удалось войти. Попробуйте ещё раз.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -72,17 +85,16 @@ export default function LoginScreen() {
         </View>
 
         <View style={styles.form}>
-          <Text style={styles.label}>Логин или email</Text>
+          <Text style={styles.label}>Логин</Text>
           <View style={styles.inputWrapper}>
             <Ionicons name="person-outline" size={20} color={colors.textMuted} />
             <TextInput
               value={login}
               onChangeText={setLogin}
-              placeholder="demo@smartclearing.ru"
+              placeholder="Введите логин"
               placeholderTextColor={colors.textMuted}
               autoCapitalize="none"
               autoCorrect={false}
-              keyboardType="email-address"
               returnKeyType="next"
               onSubmitEditing={() => passwordRef.current?.focus()}
               style={styles.input}
@@ -147,10 +159,6 @@ export default function LoginScreen() {
             <Text style={styles.restoreText}>Восстановить пароль</Text>
           </Pressable>
         </View>
-
-        <Text style={styles.demoHint}>
-          Демо-режим: подойдёт любой логин и пароль.
-        </Text>
       </Screen>
     </KeyboardAvoidingView>
   );
@@ -238,10 +246,5 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontSize: 14,
     fontWeight: '600',
-  },
-  demoHint: {
-    color: colors.textMuted,
-    fontSize: 13,
-    textAlign: 'center',
   },
 });

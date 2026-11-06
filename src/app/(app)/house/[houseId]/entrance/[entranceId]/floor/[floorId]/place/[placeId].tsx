@@ -22,9 +22,9 @@ import {
 import { NotFound } from '@/components/NotFound';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { Screen } from '@/components/Screen';
-import { findEntrance, findFloor, findHouse } from '@/data/buildings';
 import { usePhotos } from '@/photos/PhotoContext';
 import { colors, radius, spacing } from '@/theme';
+import { parseId, singleParam } from '@/utils/params';
 
 function toDisplayUri(uri: string): string {
   if (
@@ -39,17 +39,25 @@ function toDisplayUri(uri: string): string {
 }
 
 export default function PlacePhotosScreen() {
-  const { houseId, entranceId, floorId, placeId } = useLocalSearchParams<{
+  const params = useLocalSearchParams<{
     houseId: string;
     entranceId: string;
     floorId: string;
     placeId: string;
+    houseAddress?: string;
+    entranceName?: string;
+    floorName?: string;
+    placeName?: string;
   }>();
 
-  const house = findHouse(houseId);
-  const entrance = findEntrance(house, entranceId);
-  const floor = findFloor(entrance, floorId);
-  const place = floor?.places.find((item) => item.id === placeId);
+  const houseId = parseId(singleParam(params.houseId));
+  const entranceId = parseId(singleParam(params.entranceId));
+  const floorId = parseId(singleParam(params.floorId));
+  const placeId = parseId(singleParam(params.placeId));
+  const houseAddress = singleParam(params.houseAddress) ?? 'Дом';
+  const entranceName = singleParam(params.entranceName) ?? 'Подъезд';
+  const floorName = singleParam(params.floorName) ?? 'Этаж';
+  const placeName = singleParam(params.placeName) ?? 'Место';
 
   const isFocused = useIsFocused();
   const { photos, addPhoto, removePhoto } = usePhotos();
@@ -62,12 +70,17 @@ export default function PlacePhotosScreen() {
   const [isCapturing, setIsCapturing] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
 
-  if (!house || !entrance || !floor || !place) {
+  if (
+    houseId === null ||
+    entranceId === null ||
+    floorId === null ||
+    placeId === null
+  ) {
     return <NotFound message="Место не найдено. Вернитесь к выбору дома." />;
   }
 
-  const placeLabel = `${house.name} · подъезд ${entrance.number} · этаж ${floor.number} · ${place.label.toLowerCase()}`;
-  const placePhotos = photos.filter((photo) => photo.placeId === place.id);
+  const placeLabel = `${houseAddress} · ${entranceName} · этаж ${floorName} · ${placeName}`;
+  const placePhotos = photos.filter((photo) => photo.placeId === placeId);
 
   const handleCapture = async () => {
     if (!cameraRef.current || !isCameraReady || isCapturing) {
@@ -82,10 +95,14 @@ export default function PlacePhotosScreen() {
       });
 
       if (picture?.uri) {
-        addPhoto({
+        await addPhoto({
           uri: toDisplayUri(picture.uri),
           place: placeLabel,
-          placeId: place.id,
+          houseId,
+          podjezdId: entranceId,
+          etazhId: floorId,
+          placeId,
+          capturedAt: new Date().toISOString(),
         });
       }
     } catch {
@@ -224,13 +241,11 @@ export default function PlacePhotosScreen() {
   return (
     <Screen scroll>
       <View style={styles.contextCard}>
-        <Text style={styles.contextHouse}>{house.name}</Text>
+        <Text style={styles.contextHouse}>{houseAddress}</Text>
         <Text style={styles.contextLine}>
-          Подъезд {entrance.number} · этаж {floor.number} · {place.label}
+          {entranceName} · этаж {floorName} · {placeName}
         </Text>
-        <Text style={styles.contextMeta}>
-          {place.area.toFixed(1).replace('.', ',')} м² · свободно
-        </Text>
+        <Text style={styles.contextMeta}>Место клиринга</Text>
       </View>
 
       {renderCamera()}
@@ -264,7 +279,9 @@ export default function PlacePhotosScreen() {
                 accessibilityLabel="Удалить фото"
                 accessibilityRole="button"
                 hitSlop={6}
-                onPress={() => removePhoto(photo.id)}
+                onPress={() => {
+                  void removePhoto(photo.id);
+                }}
                 style={styles.removeButton}
               >
                 <Ionicons name="close" size={14} color={colors.background} />
@@ -277,14 +294,14 @@ export default function PlacePhotosScreen() {
       <PrimaryButton
         title="Перейти к синхронизации"
         icon="cloud-upload-outline"
-        disabled={placePhotos.length === 0}
+        disabled={photos.length === 0}
         onPress={() => router.push('/sync')}
         style={styles.syncButton}
       />
 
       <Text style={styles.hint}>
-        Можно сделать сколько угодно снимков. Снимки хранятся в приложении до
-        синхронизации с сервисом.
+        Снимки попадают в очередь на устройстве и удаляются из неё после
+        успешной загрузки на сервер.
       </Text>
     </Screen>
   );
