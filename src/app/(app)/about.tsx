@@ -1,5 +1,5 @@
 import Constants from 'expo-constants';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { Screen } from '@/components/Screen';
 import { colors, radius, spacing } from '@/theme';
@@ -17,9 +17,11 @@ export default function AboutScreen() {
   return (
     <Screen scroll>
       <View style={styles.hero}>
-        <View style={styles.logo}>
-          <Text style={styles.logoText}>SC</Text>
-        </View>
+        <Image
+          source={require('../../../assets/logo.png')}
+          style={styles.logo}
+          accessibilityLabel="Логотип SmartClearing"
+        />
         <Text style={styles.title}>SmartClearing</Text>
         <Text style={styles.subtitle}>
           Мобильный помощник для осмотра и клиринга помещений: фиксируйте
@@ -64,18 +66,9 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   logo: {
-    width: 76,
-    height: 76,
-    borderRadius: radius.lg,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 88,
+    height: 88,
     marginBottom: spacing.sm,
-  },
-  logoText: {
-    color: colors.background,
-    fontSize: 28,
-    fontWeight: '800',
   },
   title: {
     color: colors.text,

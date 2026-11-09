@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { useRef, useState } from 'react';
 import {
   Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -75,9 +76,11 @@ export default function LoginScreen() {
     >
       <Screen scroll contentStyle={styles.content}>
         <View style={styles.header}>
-          <View style={styles.logo}>
-            <Text style={styles.logoText}>SC</Text>
-          </View>
+          <Image
+            source={require('../../assets/logo.png')}
+            style={styles.logo}
+            accessibilityLabel="Логотип SmartClearing"
+          />
           <Text style={styles.title}>SmartClearing</Text>
           <Text style={styles.subtitle}>
             Войдите, чтобы выбрать объект и синхронизировать фотографии.
@@ -179,18 +182,9 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   logo: {
-    width: 84,
-    height: 84,
-    borderRadius: radius.lg,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 96,
+    height: 96,
     marginBottom: spacing.sm,
-  },
-  logoText: {
-    color: colors.background,
-    fontSize: 30,
-    fontWeight: '800',
   },
   title: {
     color: colors.text,
