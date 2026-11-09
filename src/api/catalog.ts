@@ -25,24 +25,28 @@ export type House = {
   id: number;
   city_id: number;
   address: string;
+  photoexist?: boolean;
 };
 
 export type Podjezd = {
   id: number;
   house_id: number;
   name: string;
+  photoexist?: boolean;
 };
 
 export type Etazh = {
   id: number;
   podjezd_id: number;
   name: string;
+  photoexist?: boolean;
 };
 
 export type Place = {
   id: number;
   etazh_id: number;
   name: string;
+  photoexist?: boolean;
 };
 
 type DataResponse<T> = {

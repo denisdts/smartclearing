@@ -13,6 +13,7 @@ type HouseItem = {
   id: number;
   cityName: string;
   address: string;
+  photoexist: boolean;
 };
 
 async function loadHouses(token: string): Promise<HouseItem[]> {
@@ -24,6 +25,7 @@ async function loadHouses(token: string): Promise<HouseItem[]> {
         id: house.id,
         cityName: city.name,
         address: house.address,
+        photoexist: house.photoexist === true,
       }));
     }),
   );
@@ -72,6 +74,7 @@ export default function HousesScreen() {
                 icon="home-outline"
                 title={house.address}
                 subtitle={house.cityName}
+                highlighted={house.photoexist}
                 onPress={() =>
                   router.push({
                     pathname: '/house/[houseId]/entrances',

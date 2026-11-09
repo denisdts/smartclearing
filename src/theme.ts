@@ -9,6 +9,10 @@ export const colors = {
   border: '#24425F',
   danger: '#FF6B6B',
   warning: '#F5B942',
+  highlight: '#F5B942',
+  highlightBorder: '#D99A2B',
+  highlightText: '#13293D',
+  highlightTextMuted: '#4A5568',
 };
 
 export const spacing = {

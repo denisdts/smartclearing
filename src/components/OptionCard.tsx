@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors, radius, spacing } from '@/theme';
@@ -11,6 +11,7 @@ type OptionCardProps = {
   badgeColor?: string;
   selected?: boolean;
   disabled?: boolean;
+  highlighted?: boolean;
   onPress: () => void;
 };
 
@@ -22,6 +23,7 @@ export function OptionCard({
   badgeColor = colors.textMuted,
   selected = false,
   disabled = false,
+  highlighted = false,
   onPress,
 }: OptionCardProps) {
   return (
@@ -33,33 +35,67 @@ export function OptionCard({
       style={({ pressed }) => [
         styles.card,
         selected && styles.cardSelected,
+        highlighted && styles.cardHighlighted,
         disabled && styles.cardDisabled,
         pressed && !disabled && styles.cardPressed,
       ]}
     >
       {icon ? (
-        <View style={[styles.iconBox, selected && styles.iconBoxSelected]}>
+        <View
+          style={[
+            styles.iconBox,
+            selected && styles.iconBoxSelected,
+            highlighted && styles.iconBoxHighlighted,
+          ]}
+        >
           <Ionicons
             name={icon}
             size={22}
-            color={selected ? colors.background : colors.primary}
+            color={
+              highlighted
+                ? colors.highlightText
+                : selected
+                  ? colors.background
+                  : colors.primary
+            }
           />
         </View>
       ) : null}
 
       <View style={styles.body}>
-        <Text style={styles.title}>{title}</Text>
-        {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+        <Text style={[styles.title, highlighted && styles.titleHighlighted]}>
+          {title}
+        </Text>
+        {subtitle ? (
+          <Text
+            style={[styles.subtitle, highlighted && styles.subtitleHighlighted]}
+          >
+            {subtitle}
+          </Text>
+        ) : null}
       </View>
 
       {badge ? (
-        <Text style={[styles.badge, { color: badgeColor }]}>{badge}</Text>
+        <Text
+          style={[
+            styles.badge,
+            { color: highlighted ? colors.highlightTextMuted : badgeColor },
+          ]}
+        >
+          {badge}
+        </Text>
       ) : null}
 
       <Ionicons
         name={selected ? 'checkmark-circle' : 'chevron-forward'}
         size={22}
-        color={selected ? colors.primary : colors.textMuted}
+        color={
+          highlighted
+            ? colors.highlightTextMuted
+            : selected
+              ? colors.primary
+              : colors.textMuted
+        }
       />
     </Pressable>
   );
@@ -80,6 +116,10 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
     backgroundColor: colors.surfaceAlt,
   },
+  cardHighlighted: {
+    backgroundColor: colors.highlight,
+    borderColor: colors.highlightBorder,
+  },
   cardDisabled: {
     opacity: 0.45,
   },
@@ -97,6 +137,9 @@ const styles = StyleSheet.create({
   iconBoxSelected: {
     backgroundColor: colors.primary,
   },
+  iconBoxHighlighted: {
+    backgroundColor: 'rgba(19, 41, 61, 0.12)',
+  },
   body: {
     flex: 1,
     gap: 2,
@@ -106,9 +149,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  titleHighlighted: {
+    color: colors.highlightText,
+  },
   subtitle: {
     color: colors.textMuted,
     fontSize: 13,
+  },
+  subtitleHighlighted: {
+    color: colors.highlightTextMuted,
   },
   badge: {
     fontSize: 12,

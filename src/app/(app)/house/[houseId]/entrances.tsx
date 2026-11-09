@@ -54,6 +54,7 @@ export default function EntrancesScreen() {
               icon="enter-outline"
               title={entrance.name || `Подъезд ${entrance.id}`}
               subtitle="Выбрать этаж"
+              highlighted={entrance.photoexist === true}
               onPress={() =>
                 router.push({
                   pathname: '/house/[houseId]/entrance/[entranceId]/floors',

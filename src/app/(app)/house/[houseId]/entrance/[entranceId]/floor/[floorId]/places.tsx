@@ -66,6 +66,7 @@ export default function PlacesScreen() {
               icon="camera-outline"
               title={place.name || `Место ${place.id}`}
               subtitle="Открыть фотографии"
+              highlighted={place.photoexist === true}
               onPress={() =>
                 router.push({
                   pathname:

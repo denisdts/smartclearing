@@ -62,6 +62,7 @@ export default function FloorsScreen() {
               icon="layers-outline"
               title={`Этаж ${floor.name || floor.id}`}
               subtitle="Выбрать место"
+              highlighted={floor.photoexist === true}
               onPress={() =>
                 router.push({
                   pathname:
