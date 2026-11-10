@@ -6,10 +6,13 @@ import { useAuth } from '@/auth/AuthContext';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { Screen } from '@/components/Screen';
 import { usePhotos } from '@/photos/PhotoContext';
-import { colors, radius, spacing } from '@/theme';
+import { radius, spacing, type Palette } from '@/theme';
+import { useTheme, useThemedStyles } from '@/theme-provider';
 
 export default function SyncScreen() {
   const { session, signOut } = useAuth();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const { photos, isLoading, uploadingId, uploadPending, removePhoto } =
     usePhotos();
 
@@ -176,144 +179,145 @@ export default function SyncScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  progressCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.md,
-    gap: spacing.sm,
-  },
-  progressHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.md,
-  },
-  progressTitle: {
-    flex: 1,
-    color: colors.text,
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  progressPercent: {
-    color: colors.primary,
-    fontSize: 18,
-    fontWeight: '800',
-  },
-  progressTrack: {
-    height: 8,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surfaceAlt,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: radius.pill,
-    backgroundColor: colors.primary,
-  },
-  progressMeta: {
-    color: colors.textMuted,
-    fontSize: 13,
-  },
-  notice: {
-    color: colors.warning,
-    fontSize: 13,
-    lineHeight: 19,
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.md,
-  },
-  sectionTitle: {
-    color: colors.textMuted,
-    fontSize: 13,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginTop: spacing.sm,
-  },
-  empty: {
-    color: colors.textMuted,
-    fontSize: 14,
-    lineHeight: 20,
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.md,
-  },
-  loadingCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  photoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.md,
-  },
-  thumbnail: {
-    width: 44,
-    height: 44,
-    borderRadius: radius.sm,
-    backgroundColor: colors.surfaceAlt,
-  },
-  photoText: {
-    flex: 1,
-    gap: 2,
-  },
-  photoName: {
-    color: colors.text,
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  photoMeta: {
-    color: colors.textMuted,
-    fontSize: 12,
-    lineHeight: 17,
-  },
-  photoError: {
-    color: colors.danger,
-    fontSize: 12,
-    lineHeight: 17,
-  },
-  status: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  statusPending: {
-    color: colors.warning,
-  },
-  statusFailed: {
-    color: colors.danger,
-  },
-  removeButton: {
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pressed: {
-    opacity: 0.6,
-  },
-  disabled: {
-    opacity: 0.4,
-  },
-  button: {
-    marginTop: spacing.md,
-  },
-  hint: {
-    color: colors.textMuted,
-    fontSize: 13,
-    lineHeight: 19,
-    textAlign: 'center',
-  },
-});
+const createStyles = (colors: Palette) =>
+  StyleSheet.create({
+    progressCard: {
+      backgroundColor: colors.surface,
+      borderRadius: radius.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: spacing.md,
+      gap: spacing.sm,
+    },
+    progressHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: spacing.md,
+    },
+    progressTitle: {
+      flex: 1,
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: '700',
+    },
+    progressPercent: {
+      color: colors.primary,
+      fontSize: 18,
+      fontWeight: '800',
+    },
+    progressTrack: {
+      height: 8,
+      borderRadius: radius.pill,
+      backgroundColor: colors.surfaceAlt,
+      overflow: 'hidden',
+    },
+    progressFill: {
+      height: '100%',
+      borderRadius: radius.pill,
+      backgroundColor: colors.primary,
+    },
+    progressMeta: {
+      color: colors.textMuted,
+      fontSize: 13,
+    },
+    notice: {
+      color: colors.warning,
+      fontSize: 13,
+      lineHeight: 19,
+      backgroundColor: colors.surface,
+      borderRadius: radius.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: spacing.md,
+    },
+    sectionTitle: {
+      color: colors.textMuted,
+      fontSize: 13,
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+      marginTop: spacing.sm,
+    },
+    empty: {
+      color: colors.textMuted,
+      fontSize: 14,
+      lineHeight: 20,
+      backgroundColor: colors.surface,
+      borderRadius: radius.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: spacing.md,
+    },
+    loadingCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+    },
+    photoRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      backgroundColor: colors.surface,
+      borderRadius: radius.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: spacing.md,
+    },
+    thumbnail: {
+      width: 44,
+      height: 44,
+      borderRadius: radius.sm,
+      backgroundColor: colors.surfaceAlt,
+    },
+    photoText: {
+      flex: 1,
+      gap: 2,
+    },
+    photoName: {
+      color: colors.text,
+      fontSize: 15,
+      fontWeight: '600',
+    },
+    photoMeta: {
+      color: colors.textMuted,
+      fontSize: 12,
+      lineHeight: 17,
+    },
+    photoError: {
+      color: colors.danger,
+      fontSize: 12,
+      lineHeight: 17,
+    },
+    status: {
+      fontSize: 12,
+      fontWeight: '600',
+    },
+    statusPending: {
+      color: colors.warning,
+    },
+    statusFailed: {
+      color: colors.danger,
+    },
+    removeButton: {
+      width: 32,
+      height: 32,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    pressed: {
+      opacity: 0.6,
+    },
+    disabled: {
+      opacity: 0.4,
+    },
+    button: {
+      marginTop: spacing.md,
+    },
+    hint: {
+      color: colors.textMuted,
+      fontSize: 13,
+      lineHeight: 19,
+      textAlign: 'center',
+    },
+  });

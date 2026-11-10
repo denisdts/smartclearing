@@ -1,9 +1,11 @@
 import { Stack } from 'expo-router';
 
 import { HeaderActions } from '@/components/HeaderActions';
-import { colors } from '@/theme';
+import { useTheme } from '@/theme-provider';
 
 export default function AppLayout() {
+  const { colors } = useTheme();
+
   return (
     <Stack
       screenOptions={{

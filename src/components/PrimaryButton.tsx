@@ -8,7 +8,8 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import { colors, radius, spacing } from '@/theme';
+import { radius, spacing } from '@/theme';
+import { useTheme } from '@/theme-provider';
 
 type Variant = 'primary' | 'secondary' | 'danger';
 
@@ -22,18 +23,6 @@ type PrimaryButtonProps = {
   style?: StyleProp<ViewStyle>;
 };
 
-const backgrounds: Record<Variant, string> = {
-  primary: colors.primary,
-  secondary: colors.surfaceAlt,
-  danger: colors.danger,
-};
-
-const labelColors: Record<Variant, string> = {
-  primary: colors.background,
-  secondary: colors.text,
-  danger: colors.background,
-};
-
 export function PrimaryButton({
   title,
   onPress,
@@ -43,7 +32,20 @@ export function PrimaryButton({
   icon,
   style,
 }: PrimaryButtonProps) {
+  const { colors } = useTheme();
   const isDisabled = disabled || loading;
+
+  const backgrounds: Record<Variant, string> = {
+    primary: colors.primary,
+    secondary: colors.surfaceAlt,
+    danger: colors.danger,
+  };
+
+  const labelColors: Record<Variant, string> = {
+    primary: colors.background,
+    secondary: colors.text,
+    danger: colors.background,
+  };
 
   return (
     <Pressable

@@ -9,11 +9,13 @@ import { OptionCard } from '@/components/OptionCard';
 import { RequestState } from '@/components/RequestState';
 import { Screen } from '@/components/Screen';
 import { useApiData } from '@/hooks/useApiData';
-import { colors, spacing } from '@/theme';
+import { spacing, type Palette } from '@/theme';
+import { useThemedStyles } from '@/theme-provider';
 import { parseId, singleParam } from '@/utils/params';
 
 export default function PlacesScreen() {
   const { session } = useAuth();
+  const styles = useThemedStyles(createStyles);
   const params = useLocalSearchParams<{
     houseId: string;
     entranceId: string;
@@ -94,21 +96,22 @@ export default function PlacesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  context: {
-    color: colors.textMuted,
-    fontSize: 14,
-  },
-  hint: {
-    color: colors.text,
-    fontSize: 18,
-    fontWeight: '700',
-    lineHeight: 26,
-    marginBottom: spacing.sm,
-  },
-  empty: {
-    color: colors.textMuted,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-});
+const createStyles = (colors: Palette) =>
+  StyleSheet.create({
+    context: {
+      color: colors.textMuted,
+      fontSize: 14,
+    },
+    hint: {
+      color: colors.text,
+      fontSize: 18,
+      fontWeight: '700',
+      lineHeight: 26,
+      marginBottom: spacing.sm,
+    },
+    empty: {
+      color: colors.textMuted,
+      fontSize: 14,
+      lineHeight: 20,
+    },
+  });

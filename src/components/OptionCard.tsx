@@ -1,7 +1,8 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, radius, spacing } from '@/theme';
+import { radius, spacing, type Palette } from '@/theme';
+import { useTheme, useThemedStyles } from '@/theme-provider';
 
 type OptionCardProps = {
   title: string;
@@ -20,12 +21,15 @@ export function OptionCard({
   subtitle,
   icon,
   badge,
-  badgeColor = colors.textMuted,
+  badgeColor,
   selected = false,
   disabled = false,
   highlighted = false,
   onPress,
 }: OptionCardProps) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -79,7 +83,7 @@ export function OptionCard({
         <Text
           style={[
             styles.badge,
-            { color: highlighted ? colors.highlightTextMuted : badgeColor },
+            { color: highlighted ? colors.highlightTextMuted : badgeColor ?? colors.textMuted },
           ]}
         >
           {badge}
@@ -101,66 +105,67 @@ export function OptionCard({
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    padding: spacing.md,
-    borderRadius: radius.md,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  cardSelected: {
-    borderColor: colors.primary,
-    backgroundColor: colors.surfaceAlt,
-  },
-  cardHighlighted: {
-    backgroundColor: colors.highlight,
-    borderColor: colors.highlightBorder,
-  },
-  cardDisabled: {
-    opacity: 0.45,
-  },
-  cardPressed: {
-    opacity: 0.85,
-  },
-  iconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: radius.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.surfaceAlt,
-  },
-  iconBoxSelected: {
-    backgroundColor: colors.primary,
-  },
-  iconBoxHighlighted: {
-    backgroundColor: 'rgba(19, 41, 61, 0.12)',
-  },
-  body: {
-    flex: 1,
-    gap: 2,
-  },
-  title: {
-    color: colors.text,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  titleHighlighted: {
-    color: colors.highlightText,
-  },
-  subtitle: {
-    color: colors.textMuted,
-    fontSize: 13,
-  },
-  subtitleHighlighted: {
-    color: colors.highlightTextMuted,
-  },
-  badge: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-});
+const createStyles = (colors: Palette) =>
+  StyleSheet.create({
+    card: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      padding: spacing.md,
+      borderRadius: radius.md,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    cardSelected: {
+      borderColor: colors.primary,
+      backgroundColor: colors.surfaceAlt,
+    },
+    cardHighlighted: {
+      backgroundColor: colors.highlight,
+      borderColor: colors.highlightBorder,
+    },
+    cardDisabled: {
+      opacity: 0.45,
+    },
+    cardPressed: {
+      opacity: 0.85,
+    },
+    iconBox: {
+      width: 44,
+      height: 44,
+      borderRadius: radius.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.surfaceAlt,
+    },
+    iconBoxSelected: {
+      backgroundColor: colors.primary,
+    },
+    iconBoxHighlighted: {
+      backgroundColor: 'rgba(19, 41, 61, 0.12)',
+    },
+    body: {
+      flex: 1,
+      gap: 2,
+    },
+    title: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    titleHighlighted: {
+      color: colors.highlightText,
+    },
+    subtitle: {
+      color: colors.textMuted,
+      fontSize: 13,
+    },
+    subtitleHighlighted: {
+      color: colors.highlightTextMuted,
+    },
+    badge: {
+      fontSize: 12,
+      fontWeight: '600',
+    },
+  });

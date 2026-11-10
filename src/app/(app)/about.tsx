@@ -2,7 +2,8 @@ import Constants from 'expo-constants';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { Screen } from '@/components/Screen';
-import { colors, radius, spacing } from '@/theme';
+import { radius, spacing, type Palette } from '@/theme';
+import { useThemedStyles } from '@/theme-provider';
 
 const steps = [
   'Войдите в аккаунт или восстановите пароль.',
@@ -12,6 +13,7 @@ const steps = [
 ];
 
 export default function AboutScreen() {
+  const styles = useThemedStyles(createStyles);
   const version = Constants.expoConfig?.version ?? '1.0.0';
 
   return (
@@ -59,71 +61,72 @@ export default function AboutScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  hero: {
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.md,
-  },
-  logo: {
-    width: 88,
-    height: 88,
-    marginBottom: spacing.sm,
-  },
-  title: {
-    color: colors.text,
-    fontSize: 26,
-    fontWeight: '700',
-  },
-  subtitle: {
-    color: colors.textMuted,
-    fontSize: 15,
-    lineHeight: 22,
-    textAlign: 'center',
-    paddingHorizontal: spacing.md,
-  },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.md,
-    gap: spacing.sm,
-  },
-  cardTitle: {
-    color: colors.text,
-    fontSize: 17,
-    fontWeight: '700',
-    marginBottom: spacing.xs,
-  },
-  step: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.md,
-  },
-  stepBadge: {
-    width: 26,
-    height: 26,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surfaceAlt,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stepBadgeText: {
-    color: colors.primary,
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  stepText: {
-    flex: 1,
-    color: colors.textMuted,
-    fontSize: 14,
-    lineHeight: 21,
-    paddingTop: 2,
-  },
-  paragraph: {
-    color: colors.textMuted,
-    fontSize: 14,
-    lineHeight: 21,
-  },
-});
+const createStyles = (colors: Palette) =>
+  StyleSheet.create({
+    hero: {
+      alignItems: 'center',
+      gap: spacing.sm,
+      paddingVertical: spacing.md,
+    },
+    logo: {
+      width: 88,
+      height: 88,
+      marginBottom: spacing.sm,
+    },
+    title: {
+      color: colors.text,
+      fontSize: 26,
+      fontWeight: '700',
+    },
+    subtitle: {
+      color: colors.textMuted,
+      fontSize: 15,
+      lineHeight: 22,
+      textAlign: 'center',
+      paddingHorizontal: spacing.md,
+    },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: radius.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: spacing.md,
+      gap: spacing.sm,
+    },
+    cardTitle: {
+      color: colors.text,
+      fontSize: 17,
+      fontWeight: '700',
+      marginBottom: spacing.xs,
+    },
+    step: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: spacing.md,
+    },
+    stepBadge: {
+      width: 26,
+      height: 26,
+      borderRadius: radius.pill,
+      backgroundColor: colors.surfaceAlt,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    stepBadgeText: {
+      color: colors.primary,
+      fontSize: 13,
+      fontWeight: '700',
+    },
+    stepText: {
+      flex: 1,
+      color: colors.textMuted,
+      fontSize: 14,
+      lineHeight: 21,
+      paddingTop: 2,
+    },
+    paragraph: {
+      color: colors.textMuted,
+      fontSize: 14,
+      lineHeight: 21,
+    },
+  });

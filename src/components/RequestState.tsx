@@ -2,7 +2,8 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import { PrimaryButton } from '@/components/PrimaryButton';
-import { colors, radius, spacing } from '@/theme';
+import { radius, spacing, type Palette } from '@/theme';
+import { useTheme, useThemedStyles } from '@/theme-provider';
 
 type RequestStateProps = {
   isLoading: boolean;
@@ -11,6 +12,9 @@ type RequestStateProps = {
 };
 
 export function RequestState({ isLoading, error, onRetry }: RequestStateProps) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   if (isLoading) {
     return (
       <View style={styles.card}>
@@ -38,23 +42,24 @@ export function RequestState({ isLoading, error, onRetry }: RequestStateProps) {
   return null;
 }
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.lg,
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  text: {
-    color: colors.textMuted,
-    fontSize: 14,
-    lineHeight: 20,
-    textAlign: 'center',
-  },
-  button: {
-    alignSelf: 'stretch',
-  },
-});
+const createStyles = (colors: Palette) =>
+  StyleSheet.create({
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: radius.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: spacing.lg,
+      alignItems: 'center',
+      gap: spacing.md,
+    },
+    text: {
+      color: colors.textMuted,
+      fontSize: 14,
+      lineHeight: 20,
+      textAlign: 'center',
+    },
+    button: {
+      alignSelf: 'stretch',
+    },
+  });

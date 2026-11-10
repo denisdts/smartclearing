@@ -1,4 +1,23 @@
-export const colors = {
+export type ThemeName = 'dark' | 'light';
+
+export type Palette = {
+  background: string;
+  surface: string;
+  surfaceAlt: string;
+  primary: string;
+  primaryDark: string;
+  text: string;
+  textMuted: string;
+  border: string;
+  danger: string;
+  warning: string;
+  highlight: string;
+  highlightBorder: string;
+  highlightText: string;
+  highlightTextMuted: string;
+};
+
+export const darkColors: Palette = {
   background: '#0B1F33',
   surface: '#13293D',
   surfaceAlt: '#1B3550',
@@ -13,6 +32,28 @@ export const colors = {
   highlightBorder: '#D99A2B',
   highlightText: '#13293D',
   highlightTextMuted: '#4A5568',
+};
+
+export const lightColors: Palette = {
+  background: '#FFFFFF',
+  surface: '#F4F7FA',
+  surfaceAlt: '#E6EDF3',
+  primary: '#0B7F69',
+  primaryDark: '#096A58',
+  text: '#0B1F33',
+  textMuted: '#5B7186',
+  border: '#D3DEE8',
+  danger: '#D64545',
+  warning: '#B26B00',
+  highlight: '#F5B942',
+  highlightBorder: '#D99A2B',
+  highlightText: '#13293D',
+  highlightTextMuted: '#4A5568',
+};
+
+export const palettes: Record<ThemeName, Palette> = {
+  dark: darkColors,
+  light: lightColors,
 };
 
 export const spacing = {

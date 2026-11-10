@@ -23,7 +23,8 @@ import { NotFound } from '@/components/NotFound';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { Screen } from '@/components/Screen';
 import { usePhotos } from '@/photos/PhotoContext';
-import { colors, radius, spacing } from '@/theme';
+import { radius, spacing, type Palette } from '@/theme';
+import { useTheme, useThemedStyles } from '@/theme-provider';
 import { parseId, singleParam } from '@/utils/params';
 
 function toDisplayUri(uri: string): string {
@@ -39,6 +40,8 @@ function toDisplayUri(uri: string): string {
 }
 
 export default function PlacePhotosScreen() {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const params = useLocalSearchParams<{
     houseId: string;
     entranceId: string;
@@ -193,7 +196,7 @@ export default function PlacePhotosScreen() {
             <Ionicons
               name={flash === 'off' ? 'flash-off-outline' : 'flash-outline'}
               size={20}
-              color={colors.text}
+              color="#FFFFFF"
             />
           </Pressable>
 
@@ -208,7 +211,7 @@ export default function PlacePhotosScreen() {
             <Ionicons
               name="camera-reverse-outline"
               size={20}
-              color={colors.text}
+              color="#FFFFFF"
             />
           </Pressable>
         </View>
@@ -228,7 +231,7 @@ export default function PlacePhotosScreen() {
             ]}
           >
             {isCapturing ? (
-              <ActivityIndicator color={colors.background} />
+              <ActivityIndicator color="#FFFFFF" />
             ) : (
               <View style={styles.shutterInner} />
             )}
@@ -284,7 +287,7 @@ export default function PlacePhotosScreen() {
                 }}
                 style={styles.removeButton}
               >
-                <Ionicons name="close" size={14} color={colors.background} />
+                <Ionicons name="close" size={14} color="#FFFFFF" />
               </Pressable>
             </View>
           ))}
@@ -307,174 +310,175 @@ export default function PlacePhotosScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  contextCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.md,
-    gap: 4,
-  },
-  contextHouse: {
-    color: colors.text,
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  contextLine: {
-    color: colors.textMuted,
-    fontSize: 14,
-  },
-  contextMeta: {
-    color: colors.primary,
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  cameraWrapper: {
-    borderRadius: radius.lg,
-    overflow: 'hidden',
-    backgroundColor: '#000000',
-    aspectRatio: 3 / 4,
-  },
-  camera: {
-    flex: 1,
-  },
-  cameraPlaceholder: {
-    aspectRatio: 3 / 4,
-    borderRadius: radius.lg,
-    backgroundColor: colors.surface,
-  },
-  cameraTopBar: {
-    position: 'absolute',
-    top: spacing.sm,
-    right: spacing.sm,
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  cameraControl: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.45)',
-  },
-  shutterRow: {
-    position: 'absolute',
-    bottom: spacing.lg,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-  },
-  shutterOuter: {
-    width: 70,
-    height: 70,
-    borderRadius: radius.pill,
-    borderWidth: 4,
-    borderColor: colors.text,
-    backgroundColor: 'rgba(0, 0, 0, 0.35)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  shutterPressed: {
-    opacity: 0.7,
-  },
-  shutterDisabled: {
-    opacity: 0.5,
-  },
-  shutterInner: {
-    width: 52,
-    height: 52,
-    borderRadius: radius.pill,
-    backgroundColor: colors.primary,
-  },
-  permissionCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.lg,
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  permissionTitle: {
-    color: colors.text,
-    fontSize: 17,
-    fontWeight: '700',
-  },
-  permissionText: {
-    color: colors.textMuted,
-    fontSize: 14,
-    lineHeight: 20,
-    textAlign: 'center',
-  },
-  galleryHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: spacing.sm,
-  },
-  sectionTitle: {
-    color: colors.textMuted,
-    fontSize: 13,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  counter: {
-    color: colors.primary,
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  emptyGallery: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: colors.border,
-    padding: spacing.md,
-  },
-  emptyText: {
-    flex: 1,
-    color: colors.textMuted,
-    fontSize: 13,
-    lineHeight: 19,
-  },
-  gallery: {
-    gap: spacing.sm,
-    paddingRight: spacing.md,
-  },
-  thumbnailWrapper: {
-    width: 96,
-    height: 96,
-  },
-  thumbnail: {
-    width: '100%',
-    height: '100%',
-    borderRadius: radius.sm,
-    backgroundColor: colors.surfaceAlt,
-  },
-  removeButton: {
-    position: 'absolute',
-    top: 4,
-    right: 4,
-    width: 24,
-    height: 24,
-    borderRadius: radius.pill,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  syncButton: {
-    marginTop: spacing.sm,
-  },
-  hint: {
-    color: colors.textMuted,
-    fontSize: 13,
-    lineHeight: 19,
-    textAlign: 'center',
-  },
-});
+const createStyles = (colors: Palette) =>
+  StyleSheet.create({
+    contextCard: {
+      backgroundColor: colors.surface,
+      borderRadius: radius.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: spacing.md,
+      gap: 4,
+    },
+    contextHouse: {
+      color: colors.text,
+      fontSize: 18,
+      fontWeight: '700',
+    },
+    contextLine: {
+      color: colors.textMuted,
+      fontSize: 14,
+    },
+    contextMeta: {
+      color: colors.primary,
+      fontSize: 13,
+      fontWeight: '600',
+    },
+    cameraWrapper: {
+      borderRadius: radius.lg,
+      overflow: 'hidden',
+      backgroundColor: '#000000',
+      aspectRatio: 3 / 4,
+    },
+    camera: {
+      flex: 1,
+    },
+    cameraPlaceholder: {
+      aspectRatio: 3 / 4,
+      borderRadius: radius.lg,
+      backgroundColor: colors.surface,
+    },
+    cameraTopBar: {
+      position: 'absolute',
+      top: spacing.sm,
+      right: spacing.sm,
+      flexDirection: 'row',
+      gap: spacing.sm,
+    },
+    cameraControl: {
+      width: 40,
+      height: 40,
+      borderRadius: radius.pill,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    },
+    shutterRow: {
+      position: 'absolute',
+      bottom: spacing.lg,
+      left: 0,
+      right: 0,
+      alignItems: 'center',
+    },
+    shutterOuter: {
+      width: 70,
+      height: 70,
+      borderRadius: radius.pill,
+      borderWidth: 4,
+      borderColor: '#FFFFFF',
+      backgroundColor: 'rgba(0, 0, 0, 0.35)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    shutterPressed: {
+      opacity: 0.7,
+    },
+    shutterDisabled: {
+      opacity: 0.5,
+    },
+    shutterInner: {
+      width: 52,
+      height: 52,
+      borderRadius: radius.pill,
+      backgroundColor: colors.primary,
+    },
+    permissionCard: {
+      backgroundColor: colors.surface,
+      borderRadius: radius.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: spacing.lg,
+      alignItems: 'center',
+      gap: spacing.md,
+    },
+    permissionTitle: {
+      color: colors.text,
+      fontSize: 17,
+      fontWeight: '700',
+    },
+    permissionText: {
+      color: colors.textMuted,
+      fontSize: 14,
+      lineHeight: 20,
+      textAlign: 'center',
+    },
+    galleryHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginTop: spacing.sm,
+    },
+    sectionTitle: {
+      color: colors.textMuted,
+      fontSize: 13,
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+    },
+    counter: {
+      color: colors.primary,
+      fontSize: 14,
+      fontWeight: '700',
+    },
+    emptyGallery: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      backgroundColor: colors.surface,
+      borderRadius: radius.md,
+      borderWidth: 1,
+      borderStyle: 'dashed',
+      borderColor: colors.border,
+      padding: spacing.md,
+    },
+    emptyText: {
+      flex: 1,
+      color: colors.textMuted,
+      fontSize: 13,
+      lineHeight: 19,
+    },
+    gallery: {
+      gap: spacing.sm,
+      paddingRight: spacing.md,
+    },
+    thumbnailWrapper: {
+      width: 96,
+      height: 96,
+    },
+    thumbnail: {
+      width: '100%',
+      height: '100%',
+      borderRadius: radius.sm,
+      backgroundColor: colors.surfaceAlt,
+    },
+    removeButton: {
+      position: 'absolute',
+      top: 4,
+      right: 4,
+      width: 24,
+      height: 24,
+      borderRadius: radius.pill,
+      backgroundColor: colors.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    syncButton: {
+      marginTop: spacing.sm,
+    },
+    hint: {
+      color: colors.textMuted,
+      fontSize: 13,
+      lineHeight: 19,
+      textAlign: 'center',
+    },
+  });

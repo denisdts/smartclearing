@@ -18,10 +18,13 @@ import { ApiError } from '@/api/client';
 import { useAuth } from '@/auth/AuthContext';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { Screen } from '@/components/Screen';
-import { colors, radius, spacing } from '@/theme';
+import { radius, spacing, type Palette } from '@/theme';
+import { useTheme, useThemedStyles } from '@/theme-provider';
 
 export default function LoginScreen() {
   const { signIn } = useAuth();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const passwordRef = useRef<TextInputInstance>(null);
 
   const [login, setLogin] = useState('');
@@ -167,78 +170,79 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  flex: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    gap: spacing.xl,
-  },
-  header: {
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  logo: {
-    width: 96,
-    height: 96,
-    marginBottom: spacing.sm,
-  },
-  title: {
-    color: colors.text,
-    fontSize: 28,
-    fontWeight: '700',
-  },
-  subtitle: {
-    color: colors.textMuted,
-    fontSize: 15,
-    lineHeight: 22,
-    textAlign: 'center',
-    paddingHorizontal: spacing.md,
-  },
-  form: {
-    gap: spacing.sm,
-  },
-  label: {
-    color: colors.textMuted,
-    fontSize: 13,
-    fontWeight: '600',
-    marginTop: spacing.xs,
-  },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    minHeight: 52,
-  },
-  input: {
-    flex: 1,
-    color: colors.text,
-    fontSize: 16,
-    paddingVertical: spacing.sm,
-  },
-  error: {
-    color: colors.danger,
-    fontSize: 13,
-    marginTop: spacing.xs,
-  },
-  submit: {
-    marginTop: spacing.md,
-  },
-  restoreButton: {
-    alignSelf: 'center',
-    paddingVertical: spacing.sm,
-  },
-  restoreText: {
-    color: colors.primary,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-});
+const createStyles = (colors: Palette) =>
+  StyleSheet.create({
+    flex: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      flexGrow: 1,
+      justifyContent: 'center',
+      gap: spacing.xl,
+    },
+    header: {
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    logo: {
+      width: 96,
+      height: 96,
+      marginBottom: spacing.sm,
+    },
+    title: {
+      color: colors.text,
+      fontSize: 28,
+      fontWeight: '700',
+    },
+    subtitle: {
+      color: colors.textMuted,
+      fontSize: 15,
+      lineHeight: 22,
+      textAlign: 'center',
+      paddingHorizontal: spacing.md,
+    },
+    form: {
+      gap: spacing.sm,
+    },
+    label: {
+      color: colors.textMuted,
+      fontSize: 13,
+      fontWeight: '600',
+      marginTop: spacing.xs,
+    },
+    inputWrapper: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: radius.md,
+      paddingHorizontal: spacing.md,
+      minHeight: 52,
+    },
+    input: {
+      flex: 1,
+      color: colors.text,
+      fontSize: 16,
+      paddingVertical: spacing.sm,
+    },
+    error: {
+      color: colors.danger,
+      fontSize: 13,
+      marginTop: spacing.xs,
+    },
+    submit: {
+      marginTop: spacing.md,
+    },
+    restoreButton: {
+      alignSelf: 'center',
+      paddingVertical: spacing.sm,
+    },
+    restoreText: {
+      color: colors.primary,
+      fontSize: 14,
+      fontWeight: '600',
+    },
+  });

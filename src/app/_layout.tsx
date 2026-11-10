@@ -4,51 +4,57 @@ import { useEffect } from 'react';
 
 import { AuthProvider, useAuth } from '@/auth/AuthContext';
 import { PhotoProvider } from '@/photos/PhotoContext';
-import { colors } from '@/theme';
+import { ThemeProvider, useTheme } from '@/theme-provider';
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 function SplashController() {
   const { isLoading } = useAuth();
+  const { isReady } = useTheme();
 
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading && isReady) {
       SplashScreen.hideAsync().catch(() => undefined);
     }
-  }, [isLoading]);
+  }, [isLoading, isReady]);
 
   return null;
 }
 
 function RootNavigator() {
   const { session } = useAuth();
+  const { colors, isDark } = useTheme();
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: colors.background },
-      }}
-    >
-      <Stack.Protected guard={!!session}>
-        <Stack.Screen name="(app)" />
-      </Stack.Protected>
+    <>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <SplashController />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.background },
+        }}
+      >
+        <Stack.Protected guard={!!session}>
+          <Stack.Screen name="(app)" />
+        </Stack.Protected>
 
-      <Stack.Protected guard={!session}>
-        <Stack.Screen name="login" />
-      </Stack.Protected>
-    </Stack>
+        <Stack.Protected guard={!session}>
+          <Stack.Screen name="login" />
+        </Stack.Protected>
+      </Stack>
+    </>
   );
 }
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <PhotoProvider>
-        <StatusBar style="light" />
-        <SplashController />
-        <RootNavigator />
-      </PhotoProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <PhotoProvider>
+          <RootNavigator />
+        </PhotoProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

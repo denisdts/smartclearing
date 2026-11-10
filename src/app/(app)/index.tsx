@@ -7,7 +7,8 @@ import { OptionCard } from '@/components/OptionCard';
 import { RequestState } from '@/components/RequestState';
 import { Screen } from '@/components/Screen';
 import { useApiData } from '@/hooks/useApiData';
-import { colors, radius, spacing } from '@/theme';
+import { radius, spacing, type Palette } from '@/theme';
+import { useThemedStyles } from '@/theme-provider';
 
 type HouseItem = {
   id: number;
@@ -35,6 +36,7 @@ async function loadHouses(token: string): Promise<HouseItem[]> {
 
 export default function HousesScreen() {
   const { session } = useAuth();
+  const styles = useThemedStyles(createStyles);
   const { data, error, isLoading, reload } = useApiData(
     loadHouses,
     session?.token ?? null,
@@ -93,41 +95,42 @@ export default function HousesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  intro: {
-    gap: spacing.xs,
-    marginBottom: spacing.sm,
-  },
-  greeting: {
-    color: colors.textMuted,
-    fontSize: 14,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  name: {
-    color: colors.text,
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  hint: {
-    color: colors.textMuted,
-    fontSize: 15,
-    lineHeight: 22,
-    marginTop: spacing.sm,
-  },
-  list: {
-    gap: spacing.sm,
-  },
-  empty: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.md,
-  },
-  emptyText: {
-    color: colors.textMuted,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-});
+const createStyles = (colors: Palette) =>
+  StyleSheet.create({
+    intro: {
+      gap: spacing.xs,
+      marginBottom: spacing.sm,
+    },
+    greeting: {
+      color: colors.textMuted,
+      fontSize: 14,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+    },
+    name: {
+      color: colors.text,
+      fontSize: 20,
+      fontWeight: '700',
+    },
+    hint: {
+      color: colors.textMuted,
+      fontSize: 15,
+      lineHeight: 22,
+      marginTop: spacing.sm,
+    },
+    list: {
+      gap: spacing.sm,
+    },
+    empty: {
+      backgroundColor: colors.surface,
+      borderRadius: radius.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: spacing.md,
+    },
+    emptyText: {
+      color: colors.textMuted,
+      fontSize: 14,
+      lineHeight: 20,
+    },
+  });

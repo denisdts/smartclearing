@@ -5,7 +5,8 @@ import { useState } from 'react';
 import { useAuth } from '@/auth/AuthContext';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { Screen } from '@/components/Screen';
-import { colors, radius, spacing } from '@/theme';
+import { radius, spacing, type Palette } from '@/theme';
+import { useTheme, useThemedStyles } from '@/theme-provider';
 
 type ToggleRowProps = {
   title: string;
@@ -15,6 +16,9 @@ type ToggleRowProps = {
 };
 
 function ToggleRow({ title, description, value, onChange }: ToggleRowProps) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   return (
     <View style={styles.toggleRow}>
       <View style={styles.toggleText}>
@@ -26,7 +30,7 @@ function ToggleRow({ title, description, value, onChange }: ToggleRowProps) {
         value={value}
         onValueChange={onChange}
         trackColor={{ false: colors.border, true: colors.primary }}
-        thumbColor={colors.text}
+        thumbColor="#FFFFFF"
       />
     </View>
   );
@@ -34,6 +38,8 @@ function ToggleRow({ title, description, value, onChange }: ToggleRowProps) {
 
 export default function SettingsScreen() {
   const { session, signOut } = useAuth();
+  const { isDark, theme, setTheme } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const [autoSync, setAutoSync] = useState(true);
   const [notifications, setNotifications] = useState(true);
   const [compress, setCompress] = useState(false);
@@ -74,6 +80,20 @@ export default function SettingsScreen() {
             </Text>
           </View>
         </View>
+      </View>
+
+      <Text style={styles.sectionTitle}>Оформление</Text>
+      <View style={styles.card}>
+        <ToggleRow
+          title="Выбор темы"
+          description={
+            theme === 'dark'
+              ? 'Тёмная тема'
+              : 'Светлая тема'
+          }
+          value={isDark}
+          onChange={(value) => setTheme(value ? 'dark' : 'light')}
+        />
       </View>
 
       <Text style={styles.sectionTitle}>Синхронизация</Text>
@@ -127,82 +147,83 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  sectionTitle: {
-    color: colors.textMuted,
-    fontSize: 13,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginTop: spacing.sm,
-  },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: spacing.md,
-  },
-  accountRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingVertical: spacing.md,
-  },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: radius.pill,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: {
-    color: colors.background,
-    fontSize: 20,
-    fontWeight: '800',
-  },
-  accountText: {
-    flex: 1,
-    gap: 2,
-  },
-  email: {
-    color: colors.text,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  toggleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingVertical: spacing.md,
-  },
-  toggleText: {
-    flex: 1,
-    gap: 2,
-  },
-  rowTitle: {
-    color: colors.text,
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  rowDescription: {
-    color: colors.textMuted,
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  divider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.border,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: spacing.md,
-    gap: spacing.md,
-  },
-  signOut: {
-    marginTop: spacing.lg,
-  },
-});
+const createStyles = (colors: Palette) =>
+  StyleSheet.create({
+    sectionTitle: {
+      color: colors.textMuted,
+      fontSize: 13,
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+      marginTop: spacing.sm,
+    },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: radius.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingHorizontal: spacing.md,
+    },
+    accountRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      paddingVertical: spacing.md,
+    },
+    avatar: {
+      width: 48,
+      height: 48,
+      borderRadius: radius.pill,
+      backgroundColor: colors.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    avatarText: {
+      color: colors.background,
+      fontSize: 20,
+      fontWeight: '800',
+    },
+    accountText: {
+      flex: 1,
+      gap: 2,
+    },
+    email: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    toggleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      paddingVertical: spacing.md,
+    },
+    toggleText: {
+      flex: 1,
+      gap: 2,
+    },
+    rowTitle: {
+      color: colors.text,
+      fontSize: 15,
+      fontWeight: '600',
+    },
+    rowDescription: {
+      color: colors.textMuted,
+      fontSize: 13,
+      lineHeight: 18,
+    },
+    divider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: colors.border,
+    },
+    infoRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: spacing.md,
+      gap: spacing.md,
+    },
+    signOut: {
+      marginTop: spacing.lg,
+    },
+  });

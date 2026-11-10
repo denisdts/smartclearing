@@ -8,7 +8,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { colors, spacing } from '@/theme';
+import { spacing, type Palette } from '@/theme';
+import { useThemedStyles } from '@/theme-provider';
 
 type ScreenProps = PropsWithChildren<{
   scroll?: boolean;
@@ -16,6 +17,8 @@ type ScreenProps = PropsWithChildren<{
 }>;
 
 export function Screen({ children, scroll = false, contentStyle }: ScreenProps) {
+  const styles = useThemedStyles(createStyles);
+
   if (scroll) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['left', 'right', 'bottom']}>
@@ -37,16 +40,17 @@ export function Screen({ children, scroll = false, contentStyle }: ScreenProps) 
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    padding: spacing.lg,
-    gap: spacing.md,
-  },
-  fill: {
-    flex: 1,
-  },
-});
+const createStyles = (colors: Palette) =>
+  StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      padding: spacing.lg,
+      gap: spacing.md,
+    },
+    fill: {
+      flex: 1,
+    },
+  });

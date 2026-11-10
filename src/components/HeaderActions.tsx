@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, usePathname, type Href } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { colors } from '@/theme';
+import { useTheme } from '@/theme-provider';
 
 type HeaderAction = {
   href: Href;
@@ -30,6 +30,7 @@ const actions: HeaderAction[] = [
 
 export function HeaderActions() {
   const pathname = usePathname();
+  const { colors } = useTheme();
 
   return (
     <View style={styles.row}>
