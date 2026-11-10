@@ -1,6 +1,6 @@
 # vendor.api — справочник REST API
 
-Актуально для модуля `vendor.api` версии `1.0.0`. Версия справочника — `1.1.0`.
+Актуально для модуля `vendor.api` версии `1.2.0`. Версия справочника — `1.3.0`.
 
 Базовый URL: `https://smartclearing.ru/api`
 
@@ -16,7 +16,10 @@
 - [Текущие методы](#текущие-методы)
   - [GET /api/health](#get-apihealth)
   - [POST /api/auth/login](#post-apiauthlogin)
+  - [POST /api/auth/refresh](#post-apiauthrefresh)
   - [GET /api/auth/me](#get-apiauthme)
+  - [POST /api/push-tokens](#post-apipush-tokens)
+  - [DELETE /api/push-tokens](#delete-apipush-tokens)
   - [GET /api/cities](#get-apicities)
   - [GET /api/cities/{cityId}/houses](#get-apicitiescityidhouses)
   - [GET /api/houses/{houseId}/podjezdy](#get-apihouseshouseidpodjezdy)
@@ -92,8 +95,11 @@ JWT подписывается алгоритмом HS256. В токене ес�
 | Метод | Путь | Авторизация | Назначение |
 |---|---|---|---|
 | GET | `/api/health` | нет | проверка доступности |
-| POST | `/api/auth/login` | нет | вход и выдача JWT |
+| POST | `/api/auth/login` | нет | вход и выдача access/refresh-токенов |
+| POST | `/api/auth/refresh` | нет | обновление access-токена по refresh-токену |
 | GET | `/api/auth/me` | да | claims текущего токена |
+| POST | `/api/push-tokens` | да | регистрация Expo push-токена устройства |
+| DELETE | `/api/push-tokens` | да | удаление push-токена устройства |
 | GET | `/api/cities` | да | список городов |
 | GET | `/api/cities/{cityId}/houses` | да | дома города, доступные пользователю |
 | GET | `/api/houses/{houseId}/podjezdy` | да | подъезды дома |
@@ -162,6 +168,58 @@ curl -i -X POST https://smartclearing.ru/api/auth/login \
   "token_type": "Bearer",
   "expires_in": 3600,
   "expires_at": "2026-11-06T07:00:00+00:00",
+  "refresh_token": "eyJ...",
+  "refresh_expires_in": 2592000,
+  "refresh_expires_at": "2026-12-06T07:00:00+00:00",
+  "user": {
+    "id": 1,
+    "login": "admin",
+    "email": "admin@example.com",
+    "name": "Администратор"
+  }
+}
+```
+
+`access_token` живёт `jwt_ttl` секунд (по умолчанию 3600), `refresh_token` —
+`jwt_refresh_ttl` секунд (по умолчанию 30 дней). Refresh-токен передаётся
+только на `POST /api/auth/refresh` и не принимается как Bearer-токен.
+
+Ошибки:
+
+| Код | Причина |
+|---|---|
+| `401` | неверный логин или пароль |
+| `422` | не переданы или неверны `login`/`password` |
+
+### POST /api/auth/refresh
+
+Обменивает действующий refresh-токен на новый access-токен. Refresh-токен
+не ротируется и действует до `refresh_expires_at`.
+
+Авторизация: нет.
+
+Тело запроса (JSON или form-urlencoded):
+
+| Поле | Тип | Обязательно | Ограничения |
+|---|---|---|---|
+| `refresh_token` | string | да | до 4096 символов |
+
+Пример:
+
+```bash
+curl -i -X POST https://smartclearing.ru/api/auth/refresh \
+  -H 'Content-Type: application/json' \
+  -d '{"refresh_token":"eyJ..."}'
+```
+
+Ответ `200`:
+
+```json
+{
+  "access_token": "eyJ...",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "expires_at": "2026-11-06T08:00:00+00:00",
   "user": {
     "id": 1,
     "login": "admin",
@@ -175,8 +233,8 @@ curl -i -X POST https://smartclearing.ru/api/auth/login \
 
 | Код | Причина |
 |---|---|
-| `401` | неверный логин или пароль |
-| `422` | не переданы или неверны `login`/`password` |
+| `401` | refresh-токен отсутствует, просрочен или недействителен |
+| `422` | не передан `refresh_token` |
 
 ### GET /api/auth/me
 
@@ -212,6 +270,41 @@ curl -i https://smartclearing.ru/api/auth/me \
   }
 }
 ```
+
+### POST /api/push-tokens
+
+Регистрирует Expo push-токен устройства за текущим пользователем. Повторная
+регистрация того же токена обновляет владельца и платформу.
+
+Авторизация: обязательный JWT.
+
+Тело запроса:
+
+| Поле | Тип | Обязательно | Ограничения |
+|---|---|---|---|
+| `token` | string | да | до 255 символов |
+| `platform` | string | да | `ios` или `android` |
+
+Ответ `201`:
+
+```json
+{ "status": "ok" }
+```
+
+### DELETE /api/push-tokens
+
+Удаляет Expo push-токен устройства текущего пользователя (например, при выходе
+из аккаунта или отключении уведомлений).
+
+Авторизация: обязательный JWT.
+
+Тело запроса:
+
+| Поле | Тип | Обязательно | Ограничения |
+|---|---|---|---|
+| `token` | string | да | до 255 символов |
+
+Ответ: `204 No Content`.
 
 ### Справочники мест и фотоотчёты
 
@@ -601,7 +694,7 @@ Path-параметр `id` — целое число (`\d+`). Некоррект
 ### Базовый адрес и версия
 
 - Базовый URL: `https://smartclearing.ru/api`.
-- Версия контракта: `1.1.0` (модуль `vendor.api` `1.0.0`).
+- Версия контракта: `1.3.0` (модуль `vendor.api` `1.2.0`).
 - Формат обмена: JSON, кроме `POST /api/photos` (`multipart/form-data`).
 - Кодировка: UTF-8.
 - Даты: строки RFC 3339 / ISO 8601 с часовым поясом, например
@@ -609,9 +702,11 @@ Path-параметр `id` — целое число (`\d+`). Некоррект
 
 ### Порядок интеграции
 
-1. `POST /api/auth/login` — получить `access_token`.
-2. Передавать токен в каждом запросе: `Authorization: Bearer <access_token>`.
-3. При `401` выполнить вход повторно: отдельного refresh-метода нет.
+1. `POST /api/auth/login` — получить `access_token` и `refresh_token`.
+2. Передавать access-токен в каждом запросе: `Authorization: Bearer <access_token>`.
+3. При `401` вызвать `POST /api/auth/refresh` с `refresh_token` и повторить
+   исходный запрос с новым access-токеном. Если refresh-токен тоже истёк,
+   выполнить вход повторно.
 4. `GET /api/cities` — получить города.
 5. `GET /api/cities/{cityId}/houses` — получить доступные дома города.
 6. `GET /api/houses/{houseId}/podjezdy` — получить подъезды.
@@ -817,15 +912,22 @@ final class OrdersController extends BaseController
 | Параметр | По умолчанию | Назначение |
 |---|---|---|
 | `jwt_secret` | генерируется | секрет HS256 |
-| `jwt_ttl` | `3600` | время жизни токена, секунд |
+| `jwt_ttl` | `3600` | время жизни access-токена, секунд |
+| `jwt_refresh_ttl` | `2592000` | время жизни refresh-токена, секунд |
 | `jwt_issuer` | `vendor.api` | claim `iss` |
 | `jwt_leeway` | `30` | допуск по времени, секунд |
 | `api_prefix` | `/api` | префикс путей |
 | `cors_origins` | пусто | разрешённые Origin; `*` — все |
 | `debug` | `N` | детали ошибок в JSON |
+| `expo_access_token` | пусто | access token Expo Push Service (опционально) |
 
 Если `jwt_secret` пуст, используется переменная окружения
 `VENDOR_API_JWT_SECRET`. Debug также можно включить через `VENDOR_API_DEBUG=1`.
+Expo access token можно задать через `VENDOR_API_EXPO_ACCESS_TOKEN`.
+
+Приложение получает Expo push-токен через `expo-notifications` и регистрирует
+его в `POST /api/push-tokens`. Отправка выполняется через Expo Push Service;
+для Android нужны FCM V1 credentials, для iOS — APNs key в Expo/EAS.
 
 При непустом `cors_origins` API добавляет CORS-заголовки и отвечает на
 preflight `OPTIONS` кодом `204`.
@@ -891,5 +993,7 @@ curl -i https://smartclearing.ru/local/api/Controllers/ExampleController.php
 
 | Версия | Дата | Изменения |
 |---|---|---|
+| 1.3.0 | 2026-11-10 | Добавлены Expo push-уведомления: `POST`/`DELETE /api/push-tokens`, сервис отправки, ручная рассылка и автоматическое уведомление о первом фотоотчёте. |
+| 1.2.0 | 2026-11-10 | Добавлены refresh-токены: `POST /api/auth/refresh`, поля `refresh_token`/`refresh_expires_*` в ответе логина и настройка `jwt_refresh_ttl`. |
 | 1.1.0 | 2026-11-06 | Добавлены методы справочников (`cities`, `houses`, `podjezdy`, `etazhi`, `places`) и загрузки фотоотчёта (`photos`); описана интеграция с внешним приложением. |
 | 1.0.0 | 2026-11-06 | Первичная документация: health, auth, examples; описаны JWT, параметры, валидация и маршрутизация. |

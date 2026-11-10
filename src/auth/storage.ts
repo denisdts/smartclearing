@@ -2,48 +2,68 @@ import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
 const SESSION_KEY = 'smartclearing.session';
+const REMEMBER_AUTH_KEY = 'smartclearing.remember-auth';
 
-export async function loadSession(): Promise<string | null> {
+async function readValue(key: string): Promise<string | null> {
   if (Platform.OS === 'web') {
     try {
       return typeof localStorage === 'undefined'
         ? null
-        : localStorage.getItem(SESSION_KEY);
+        : localStorage.getItem(key);
     } catch {
       return null;
     }
   }
 
   try {
-    return await SecureStore.getItemAsync(SESSION_KEY);
+    return await SecureStore.getItemAsync(key);
   } catch {
     return null;
   }
 }
 
-export async function saveSession(value: string | null): Promise<void> {
+async function writeValue(key: string, value: string | null): Promise<void> {
   if (Platform.OS === 'web') {
     try {
       if (typeof localStorage === 'undefined') {
         return;
       }
       if (value === null) {
-        localStorage.removeItem(SESSION_KEY);
+        localStorage.removeItem(key);
       } else {
-        localStorage.setItem(SESSION_KEY, value);
+        localStorage.setItem(key, value);
       }
     } catch {
-      return;
+      // Ignore storage errors: the in-memory state still works.
     }
+    return;
   }
 
   try {
     if (value === null) {
-      await SecureStore.deleteItemAsync(SESSION_KEY);
+      await SecureStore.deleteItemAsync(key);
     } else {
-      await SecureStore.setItemAsync(SESSION_KEY, value);
+      await SecureStore.setItemAsync(key, value);
     }
   } catch {
-    // Ignore storage errors: the in-memory session still works.
+    // Ignore storage errors: the in-memory state still works.
   }
+}
+
+export function loadSession(): Promise<string | null> {
+  return readValue(SESSION_KEY);
+}
+
+export function saveSession(value: string | null): Promise<void> {
+  return writeValue(SESSION_KEY, value);
+}
+
+export async function loadRememberAuth(): Promise<boolean> {
+  const value = await readValue(REMEMBER_AUTH_KEY);
+
+  return value === null ? true : value === '1';
+}
+
+export function saveRememberAuth(value: boolean): Promise<void> {
+  return writeValue(REMEMBER_AUTH_KEY, value ? '1' : '0');
 }

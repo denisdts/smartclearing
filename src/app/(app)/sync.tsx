@@ -5,12 +5,12 @@ import { ActivityIndicator, Alert, Image, Pressable, StyleSheet, Text, View } fr
 import { useAuth } from '@/auth/AuthContext';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { Screen } from '@/components/Screen';
-import { usePhotos } from '@/photos/PhotoContext';
+import { usePhotos, type UploadSummary } from '@/photos/PhotoContext';
 import { radius, spacing, type Palette } from '@/theme';
 import { useTheme, useThemedStyles } from '@/theme-provider';
 
 export default function SyncScreen() {
-  const { session, signOut } = useAuth();
+  const { session, signOut, refreshSession } = useAuth();
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
   const { photos, isLoading, uploadingId, uploadPending, removePhoto } =
@@ -35,7 +35,23 @@ export default function SyncScreen() {
     setLastSync(null);
     setRunTotal(photos.length);
 
-    const result = await uploadPending(session.token);
+    let result: UploadSummary;
+
+    try {
+      result = await uploadPending(session.token);
+
+      if (result.unauthorized) {
+        const nextToken = await refreshSession();
+
+        if (nextToken) {
+          result = await uploadPending(nextToken);
+        }
+      }
+    } catch {
+      setIsUploading(false);
+      setNotice('Не удалось обновить сессию. Проверьте соединение.');
+      return;
+    }
 
     setIsUploading(false);
     setLastSync(new Date());

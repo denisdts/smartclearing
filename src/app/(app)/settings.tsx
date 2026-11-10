@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useAuth } from '@/auth/AuthContext';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { Screen } from '@/components/Screen';
+import { usePushNotifications } from '@/notifications/PushNotificationsContext';
 import { radius, spacing, type Palette } from '@/theme';
 import { useTheme, useThemedStyles } from '@/theme-provider';
 
@@ -13,9 +14,16 @@ type ToggleRowProps = {
   description: string;
   value: boolean;
   onChange: (value: boolean) => void;
+  disabled?: boolean;
 };
 
-function ToggleRow({ title, description, value, onChange }: ToggleRowProps) {
+function ToggleRow({
+  title,
+  description,
+  value,
+  onChange,
+  disabled = false,
+}: ToggleRowProps) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
 
@@ -29,6 +37,7 @@ function ToggleRow({ title, description, value, onChange }: ToggleRowProps) {
         accessibilityLabel={title}
         value={value}
         onValueChange={onChange}
+        disabled={disabled}
         trackColor={{ false: colors.border, true: colors.primary }}
         thumbColor="#FFFFFF"
       />
@@ -37,12 +46,18 @@ function ToggleRow({ title, description, value, onChange }: ToggleRowProps) {
 }
 
 export default function SettingsScreen() {
-  const { session, signOut } = useAuth();
+  const { session, signOut, rememberAuth, setRememberAuth } = useAuth();
   const { isDark, theme, setTheme } = useTheme();
+  const {
+    enabled: pushEnabled,
+    isBusy: pushBusy,
+    isSupported: pushSupported,
+    error: pushError,
+    setEnabled: setPushEnabled,
+    unregister: unregisterPushNotifications,
+  } = usePushNotifications();
   const styles = useThemedStyles(createStyles);
   const [autoSync, setAutoSync] = useState(true);
-  const [notifications, setNotifications] = useState(true);
-  const [compress, setCompress] = useState(false);
 
   const version = Constants.expoConfig?.version ?? '1.0.0';
 
@@ -53,7 +68,10 @@ export default function SettingsScreen() {
         text: 'Выйти',
         style: 'destructive',
         onPress: () => {
-          void signOut();
+          void (async () => {
+            await unregisterPushNotifications();
+            await signOut();
+          })();
         },
       },
     ]);
@@ -80,6 +98,15 @@ export default function SettingsScreen() {
             </Text>
           </View>
         </View>
+        <View style={styles.divider} />
+        <ToggleRow
+          title="Запоминать авторизацию"
+          description="Автоматически входить после перезапуска приложения"
+          value={rememberAuth}
+          onChange={(value) => {
+            void setRememberAuth(value);
+          }}
+        />
       </View>
 
       <Text style={styles.sectionTitle}>Оформление</Text>
@@ -104,22 +131,23 @@ export default function SettingsScreen() {
           value={autoSync}
           onChange={setAutoSync}
         />
-        <View style={styles.divider} />
-        <ToggleRow
-          title="Сжимать фото"
-          description="Уменьшать размер перед загрузкой на сервер"
-          value={compress}
-          onChange={setCompress}
-        />
       </View>
 
       <Text style={styles.sectionTitle}>Уведомления</Text>
       <View style={styles.card}>
         <ToggleRow
           title="Push-уведомления"
-          description="Сообщения о статусе клиринга и синхронизации"
-          value={notifications}
-          onChange={setNotifications}
+          description={
+            !pushSupported
+              ? 'Доступны только в мобильном приложении'
+              : pushError ??
+                'Сообщения о статусе клиринга и синхронизации'
+          }
+          value={pushEnabled}
+          onChange={(value) => {
+            void setPushEnabled(value);
+          }}
+          disabled={!pushSupported || pushBusy}
         />
       </View>
 

@@ -18,7 +18,7 @@ export function useApiData<T>(
   token: string | null,
   key: string,
 ): ApiDataResult<T> {
-  const { signOut } = useAuth();
+  const { signOut, refreshSession } = useAuth();
   const [state, setState] = useState<ApiDataState<T>>({
     data: null,
     error: null,
@@ -39,13 +39,36 @@ export function useApiData<T>(
           setState({ data, error: null, isLoading: false });
         }
       })
-      .catch((error: unknown) => {
+      .catch(async (error: unknown) => {
         if (!active) {
           return;
         }
 
         if (error instanceof ApiError && error.status === 401) {
-          void signOut();
+          try {
+            const nextToken = await refreshSession();
+
+            if (!nextToken && active) {
+              await signOut();
+              return;
+            }
+
+            if (active) {
+              setState((current) => ({
+                data: current.data,
+                error: null,
+                isLoading: true,
+              }));
+            }
+          } catch {
+            if (active) {
+              setState((current) => ({
+                data: current.data,
+                error: 'Не удалось обновить сессию. Проверьте соединение.',
+                isLoading: false,
+              }));
+            }
+          }
           return;
         }
 
@@ -59,7 +82,7 @@ export function useApiData<T>(
     return () => {
       active = false;
     };
-  }, [token, key, attempt, signOut, load]);
+  }, [token, key, attempt, signOut, refreshSession, load]);
 
   const reload = useCallback(() => {
     setState((current) => ({

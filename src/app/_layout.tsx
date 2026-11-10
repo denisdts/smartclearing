@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
 import { AuthProvider, useAuth } from '@/auth/AuthContext';
+import { PushNotificationsProvider } from '@/notifications/PushNotificationsContext';
 import { PhotoProvider } from '@/photos/PhotoContext';
 import { ThemeProvider, useTheme } from '@/theme-provider';
 
@@ -52,7 +53,9 @@ export default function RootLayout() {
     <ThemeProvider>
       <AuthProvider>
         <PhotoProvider>
-          <RootNavigator />
+          <PushNotificationsProvider>
+            <RootNavigator />
+          </PushNotificationsProvider>
         </PhotoProvider>
       </AuthProvider>
     </ThemeProvider>

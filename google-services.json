@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "530579706070",
+    "project_id": "smartclearing-90989",
+    "storage_bucket": "smartclearing-90989.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:530579706070:android:8756c8ef29a8fca02df977",
+        "android_client_info": {
+          "package_name": "com.smartclearing.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0_IU4HLbKLajnDoxgLn3wc3nGZz4Wqqo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

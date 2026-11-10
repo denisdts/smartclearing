@@ -3,17 +3,33 @@ import { Platform } from 'react-native';
 
 import { apiRequest } from './client';
 
+export type SessionUserResponse = {
+  id: number;
+  login: string;
+  email: string | null;
+  name: string | null;
+};
+
 export type LoginResponse = {
   access_token: string;
   token_type: string;
   expires_in: number;
   expires_at: string;
-  user: {
-    id: number;
-    login: string;
-    email: string | null;
-    name: string | null;
-  };
+  refresh_token?: string;
+  refresh_expires_in?: number;
+  refresh_expires_at?: string;
+  user: SessionUserResponse;
+};
+
+export type RefreshResponse = {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  expires_at: string;
+  refresh_token?: string;
+  refresh_expires_in?: number;
+  refresh_expires_at?: string;
+  user?: SessionUserResponse;
 };
 
 export type City = {
@@ -60,6 +76,38 @@ export async function loginRequest(
   return apiRequest<LoginResponse>('/auth/login', {
     method: 'POST',
     body: { login, password },
+  });
+}
+
+export async function refreshRequest(
+  refreshToken: string,
+): Promise<RefreshResponse> {
+  return apiRequest<RefreshResponse>('/auth/refresh', {
+    method: 'POST',
+    body: { refresh_token: refreshToken },
+  });
+}
+
+export async function registerPushTokenRequest(
+  token: string,
+  authToken: string,
+  platform: string,
+): Promise<void> {
+  await apiRequest('/push-tokens', {
+    method: 'POST',
+    token: authToken,
+    body: { token, platform },
+  });
+}
+
+export async function unregisterPushTokenRequest(
+  token: string,
+  authToken: string,
+): Promise<void> {
+  await apiRequest('/push-tokens', {
+    method: 'DELETE',
+    token: authToken,
+    body: { token },
   });
 }
 

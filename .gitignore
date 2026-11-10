@@ -22,6 +22,10 @@ expo-env.d.ts
 *.key
 *.mobileprovision
 
+# Firebase service account private keys — never commit
+*firebase-adminsdk*.json
+*service-account*.json
+
 # Metro
 .metro-health-check*
 

@@ -11,6 +11,8 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.smartclearing.app",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#0B1F33",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -18,7 +20,6 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.smartclearing.app",
       "versionCode": 1,
       "permissions": [
         "android.permission.CAMERA"
@@ -32,6 +33,7 @@
       "expo-status-bar",
       "expo-secure-store",
       "expo-font",
+      "expo-notifications",
       [
         "expo-camera",
         {
